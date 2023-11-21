@@ -9,22 +9,21 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
 @Getter
 @Setter
-public class PostRepost {
+public class ApprovedPost {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String titulo;
+    private String conteudo;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    
+    @JoinColumn(name = "community_id")
+    private Community community;
 }
 

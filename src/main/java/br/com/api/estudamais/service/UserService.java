@@ -62,4 +62,13 @@ public class UserService {
             followRepository.delete(follow);
         }
     }
+
+    public User getUserById(Long userId) {
+        Optional<User> user = usuarioRepository.findById(userId);
+        return user.orElse(null);
+    }
+
+    public User getUserByEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
 }

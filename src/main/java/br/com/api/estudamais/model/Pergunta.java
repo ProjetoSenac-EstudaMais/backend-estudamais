@@ -1,30 +1,34 @@
 package br.com.api.estudamais.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.OneToMany;
 
 @Entity
 @Getter
 @Setter
-public class PostRepost {
+public class Pergunta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String texto;
+
+    @OneToMany(mappedBy = "pergunta", cascade = CascadeType.ALL)
+    private List<Resposta> respostas;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    
+    @JoinColumn(name = "quiz_id")
+    private Quiz quiz;
 }
-
