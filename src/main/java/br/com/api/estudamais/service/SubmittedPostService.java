@@ -16,7 +16,6 @@ import br.com.api.estudamais.repository.SubmittedPostRepository;
 @Service
 public class SubmittedPostService {
 
-    
     @Autowired
     private CommunityRepository communityRepository;
 
@@ -26,7 +25,7 @@ public class SubmittedPostService {
     @Autowired
     private ApprovedPostRepository approvedPostRepository;
 
-       public SubmittedPost save(SubmittedPost submittedPost, Long communityId) {
+    public SubmittedPost save(SubmittedPost submittedPost, Long communityId) {
         Community community = communityRepository.findById(communityId).orElse(null);
         if (community != null) {
             submittedPost.setCommunity(community);
@@ -43,44 +42,45 @@ public class SubmittedPostService {
     public boolean approvePost(Long postId, Long communityId) {
         Optional<SubmittedPost> postOptional = submittedPostRepository.findById(postId);
         Optional<Community> communityOptional = communityRepository.findById(communityId);
-    
+
         if (postOptional.isPresent() && communityOptional.isPresent()) {
             SubmittedPost post = postOptional.get();
             Community community = communityOptional.get();
-    
+
+            // Aprovar o post
             post.setApproved(true);
             post.setCommunity(community);
-    
+
             submittedPostRepository.save(post);
-    
+
+            // Criar um objeto ApprovedPost
             ApprovedPost approvedPost = new ApprovedPost();
             approvedPost.setTitulo(post.getTitle());
             approvedPost.setConteudo(post.getConteudo());
-            approvedPost.setCommunity(community); 
-    
-            // Salva o post aprovado na tabela de ApprovedPost
+            approvedPost.setCommunity(community);
+
+            // Persistir o post aprovado
             approvedPostRepository.save(approvedPost);
+
+            // Adicionar à lista de postagens aprovadas da comunidade
             community.getApprovedPosts().add(approvedPost);
             communityRepository.save(community);
-    
+
             return true;
         }
-    
+
         return false;
     }
-    
-
-
 
     public boolean rejectPost(Long postId) {
         Optional<SubmittedPost> postOptional = submittedPostRepository.findById(postId);
-        
+
         if (postOptional.isPresent()) {
             SubmittedPost post = postOptional.get();
             submittedPostRepository.delete(post);
             return true;
         }
-        
+
         return false;
     }
 

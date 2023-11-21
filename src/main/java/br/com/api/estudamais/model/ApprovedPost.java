@@ -1,5 +1,7 @@
 package br.com.api.estudamais.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +26,7 @@ public class ApprovedPost {
 
     @ManyToOne
     @JoinColumn(name = "community_id")
+    @JsonIgnore // para impedir Referencia Ciclica - pode causar um looping
     private Community community;
 }
 
