@@ -1,6 +1,7 @@
 package br.com.api.estudamais.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
@@ -27,7 +29,14 @@ public class User {
     private String sobrenome;
     private String username;
     private String email;
-    
+
+    // ver o mediumblob - ele esta criando tinyblob
+    @Column(length = 50000000)
+    private byte[] avatar;
+
+    @Column(length = 50000000)
+    private byte[] banner;
+
     @JsonIgnore
     private String senha;
 

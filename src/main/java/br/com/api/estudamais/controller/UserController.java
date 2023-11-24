@@ -1,5 +1,6 @@
 package br.com.api.estudamais.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.estudamais.model.Follow;
 import br.com.api.estudamais.model.User;
@@ -64,7 +68,40 @@ public class UserController {
         return ResponseEntity.ok("Usuário seguido com sucesso!");
     }
 
-    //method tunneling - para requisições via cliente
+    @PostMapping("/{userId}/avatar")
+public ResponseEntity<String> uploadAvatar(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
+    try {
+        User user = usuarioService.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Validar o tamanho da imagem
+        int maxImageSize = 1024 * 1024; // Tamanho máximo em bytes (1 MB, por exemplo)
+        if (file.getSize() > maxImageSize) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceeds the maximum allowed size");
+        }
+
+        user.setAvatar(file.getBytes());
+        usuarioService.save(user);
+        return ResponseEntity.ok("Avatar uploaded successfully");
+    } catch (IOException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar");
+    }
+}
+
+
+    @PostMapping("/{userId}/banner")
+    public ResponseEntity<String> uploadBanner(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
+        try {
+             User user = usuarioService.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            user.setBanner(file.getBytes());
+            usuarioService.save(user);
+            return ResponseEntity.ok("Banner uploaded successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload banner");
+        }
+    }
+
+    // method tunneling - para requisições via cliente
     @PostMapping("/unfollow/{idSeguidor}/{idSeguindo}")
     public ResponseEntity<String> deixarDeSeguir(@PathVariable Long idSeguidor, @PathVariable Long idSeguindo) {
         usuarioService.deixarDeSeguirUsuario(idSeguidor, idSeguindo);
