@@ -11,7 +11,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
