@@ -24,6 +24,9 @@ public class PostService {
     private ComentarioRepository comentarioRepository;
 
     @Autowired
+    private LikeService likeService;
+
+    @Autowired
     private UserService userService;
 
     public List<Post> obterTodasPostagens() {
@@ -46,8 +49,22 @@ public class PostService {
         return null;
     }
 
+     // Método para adicionar like a um post por um usuário
+     public void adicionarLike(Long postId, Long userId) {
+        likeService.adicionarLike(postId, userId);
+    }
+
+    // Método para remover o like de um post por um usuário
+    public void removerLike(Long postId, Long userId) {
+        likeService.removerLike(postId, userId);
+    }
+
     public void excluirPost(Long postId) {
         postRepository.deleteById(postId);
+    }
+
+    public List<Post> obterPostagensPorUsuario(Long userId) {
+        return postRepository.findByAutorId(userId);
     }
 
     public Post obterPostPorId(Long postId) {

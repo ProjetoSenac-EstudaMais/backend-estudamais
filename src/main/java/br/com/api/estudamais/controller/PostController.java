@@ -12,6 +12,7 @@ import br.com.api.estudamais.service.PostService;
 import java.util.List;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/posts")
 public class PostController {
 
@@ -31,6 +32,12 @@ public class PostController {
             post.setNumeroReposts(numReposts);
         }
         
+        return ResponseEntity.ok(postagens);
+    }
+
+    @GetMapping("/usuario/{userId}")
+    public ResponseEntity<List<Post>> obterPostagensPorUsuario(@PathVariable Long userId) {
+        List<Post> postagens = postService.obterPostagensPorUsuario(userId);
         return ResponseEntity.ok(postagens);
     }
 

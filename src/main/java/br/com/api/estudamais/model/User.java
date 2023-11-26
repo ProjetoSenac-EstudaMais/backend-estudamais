@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -29,15 +28,11 @@ public class User {
     private String username;
     private String email;
 
-    // ver o mediumblob - ele esta criando tinyblob
     @Column(length = 50000000)
     private byte[] avatar;
 
     @Column(length = 50000000)
     private byte[] banner;
-
-    @JsonIgnore
-    private String senha;
 
     @OneToMany(mappedBy = "membros", cascade = CascadeType.ALL)
     private List<Community> communities = new ArrayList<>();

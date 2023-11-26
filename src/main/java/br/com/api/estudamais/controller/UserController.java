@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,14 +24,19 @@ import org.springframework.web.server.ResponseStatusException;
 import br.com.api.estudamais.model.Follow;
 import br.com.api.estudamais.model.User;
 import br.com.api.estudamais.repository.FollowRepository;
+import br.com.api.estudamais.service.FollowService;
 import br.com.api.estudamais.service.UserService;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin("*")
 public class UserController {
 
     @Autowired
     private UserService usuarioService;
+
+    @Autowired
+    private FollowService followService;
 
     @GetMapping
     public ResponseEntity<List<User>> obterTodosUsuarios() {
@@ -42,6 +48,19 @@ public class UserController {
     public ResponseEntity<User> obterUsuarioPorId(@PathVariable Long id) {
         Optional<User> usuario = usuarioService.obterUsuarioPorId(id);
         return usuario.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("profile/{username}")
+    public ResponseEntity<User> obterUsuarioPorUsername(@PathVariable String username) {
+        Optional<User> usuario = usuarioService.findByUsername(username);
+        return usuario.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/checkIfUserIsFollowing/{followerId}/{followingId}")
+    public ResponseEntity<Boolean> checkIfUserIsFollowing(@PathVariable Long followerId,
+            @PathVariable Long followingId) {
+        boolean isFollowing = followService.checkIfUserIsFollowing(followerId, followingId);
+        return ResponseEntity.ok(isFollowing);
     }
 
     @PostMapping
@@ -69,29 +88,30 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/avatar")
-public ResponseEntity<String> uploadAvatar(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
-    try {
-        User user = usuarioService.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    public ResponseEntity<String> uploadAvatar(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
+        try {
+            User user = usuarioService.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Validar o tamanho da imagem
-        int maxImageSize = 1024 * 1024; // Tamanho máximo em bytes (1 MB, por exemplo)
-        if (file.getSize() > maxImageSize) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceeds the maximum allowed size");
+            // Validar o tamanho da imagem
+            int maxImageSize = 1024 * 1024; // Tamanho máximo em bytes (1 MB, por exemplo)
+            if (file.getSize() > maxImageSize) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Image size exceeds the maximum allowed size");
+            }
+
+            user.setAvatar(file.getBytes());
+            usuarioService.save(user);
+            return ResponseEntity.ok("Avatar uploaded successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar");
         }
-
-        user.setAvatar(file.getBytes());
-        usuarioService.save(user);
-        return ResponseEntity.ok("Avatar uploaded successfully");
-    } catch (IOException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar");
     }
-}
-
 
     @PostMapping("/{userId}/banner")
     public ResponseEntity<String> uploadBanner(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
         try {
-             User user = usuarioService.findById(userId)
+            User user = usuarioService.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
             user.setBanner(file.getBytes());
             usuarioService.save(user);
@@ -120,6 +140,12 @@ public ResponseEntity<String> uploadAvatar(@PathVariable Long userId, @RequestPa
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(usersFollowed);
+    }
+
+    @GetMapping("/{userId}/seguindo")
+    public ResponseEntity<List<User>> getUsersFollowing(@PathVariable Long userId) {
+        List<User> usersFollowing = followService.getUsersFollowingUser(userId);
+        return ResponseEntity.ok(usersFollowing);
     }
 
 }

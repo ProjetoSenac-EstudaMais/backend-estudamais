@@ -84,6 +84,10 @@ public class CommunityService {
         return submittedPost;
     }
 
+    public List<Community> findCommunitiesByName(String nome) {
+        return communityRepository.findByNomeContainingIgnoreCase(nome);
+    }    
+
     public boolean isMemberOfCommunity(Long userId, Long communityId) {
         Community community = communityRepository.findById(communityId).orElse(null);
         if (community != null) {

@@ -30,11 +30,4 @@ public class PostLike {
     @JsonBackReference
     private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "comentario_id")
-    private Comentario comentario;
-
-    public void setAutor(User autor) {
-        this.autor = autor;
-    }
 }

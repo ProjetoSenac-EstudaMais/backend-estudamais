@@ -1,6 +1,5 @@
 package br.com.api.estudamais.service;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +22,6 @@ public class UserService {
     @Autowired
     private FollowRepository followRepository;
 
-
-
     public List<User> obterTodosUsuarios() {
         return usuarioRepository.findAll();
     }
@@ -32,6 +29,10 @@ public class UserService {
     public Optional<User> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
     }
+
+    public List<User> findUsersByName(String nome, String username) {
+        return usuarioRepository.findByNomeOrUsernameContainingIgnoreCase(nome, username);
+    }    
 
     public User criarUsuario(User usuario) {
         return usuarioRepository.save(usuario);
@@ -50,10 +51,22 @@ public class UserService {
     }
 
     public void seguirUsuario(Long idSeguidor, Long idSeguindo) {
+        if (idSeguidor.equals(idSeguindo)) {
+            // Não permitir que um usuário siga a si mesmo
+            return;
+        }
+    
         User seguidor = usuarioRepository.findById(idSeguidor).orElse(null);
         User seguindo = usuarioRepository.findById(idSeguindo).orElse(null);
-
+    
         if (seguidor != null && seguindo != null) {
+            Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowingId(idSeguidor, idSeguindo);
+    
+            if (existingFollow.isPresent()) {
+                // Não permitir seguir se já houver um follow existente
+                return;
+            }
+    
             Follow follow = new Follow();
             follow.setFollower(seguidor);
             follow.setFollowing(seguindo);
@@ -62,10 +75,9 @@ public class UserService {
     }
 
     public void deixarDeSeguirUsuario(Long idSeguidor, Long idSeguindo) {
-        Follow follow = followRepository.findByFollowerIdAndFollowingId(idSeguidor, idSeguindo);
-        if (follow != null) {
-            followRepository.delete(follow);
-        }
+        Optional<Follow> followOptional = followRepository.findByFollowerIdAndFollowingId(idSeguidor, idSeguindo);
+        
+        followOptional.ifPresent(follow -> followRepository.delete(follow));
     }
 
     public User getUserById(Long userId) {
@@ -109,5 +121,9 @@ public class UserService {
     public byte[] getUserBanner(Long userId) {
         Optional<User> userOptional = usuarioRepository.findById(userId);
         return userOptional.map(User::getBanner).orElse(null);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return usuarioRepository.findByUsername(username);
     }
 }
