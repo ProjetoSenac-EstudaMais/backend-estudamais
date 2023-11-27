@@ -1,6 +1,9 @@
 package br.com.api.estudamais.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +13,11 @@ import br.com.api.estudamais.dto.ComentarioDTO;
 import br.com.api.estudamais.dto.UsuarioDTO;
 import br.com.api.estudamais.model.Comentario;
 import br.com.api.estudamais.model.Post;
+import br.com.api.estudamais.model.PostRepost;
 import br.com.api.estudamais.model.User;
 import br.com.api.estudamais.repository.ComentarioRepository;
 import br.com.api.estudamais.repository.PostRepository;
+import br.com.api.estudamais.repository.PostRepostRepository;
 
 @Service
 public class PostService {
@@ -28,6 +33,9 @@ public class PostService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PostRepostRepository postRepostRepository;
 
     public List<Post> obterTodasPostagens() {
         return postRepository.findAll();
@@ -49,8 +57,8 @@ public class PostService {
         return null;
     }
 
-     // Método para adicionar like a um post por um usuário
-     public void adicionarLike(Long postId, Long userId) {
+    // Método para adicionar like a um post por um usuário
+    public void adicionarLike(Long postId, Long userId) {
         likeService.adicionarLike(postId, userId);
     }
 
@@ -87,6 +95,31 @@ public class PostService {
         }
 
         return null;
+    }
+
+    public List<Map<String, Object>> obterTodasPostagensEReposts() {
+        List<Post> postagens = postRepository.findAll();
+        List<Map<String, Object>> combinedList = new ArrayList<>();
+
+        for (Post post : postagens) {
+            Map<String, Object> postInfo = new HashMap<>();
+            postInfo.put("id", post.getId());
+            postInfo.put("conteudo", post.getConteudo());
+            postInfo.put("tipo", "postagem"); // Indica que é uma postagem original
+            combinedList.add(postInfo);
+
+            List<PostRepost> reposts = postRepostRepository.findByPostId(post.getId());
+            for (PostRepost repost : reposts) {
+                Map<String, Object> repostInfo = new HashMap<>();
+                repostInfo.put("id", repost.getId());
+                repostInfo.put("userId", repost.getUser().getId());
+                repostInfo.put("postId", repost.getPost().getId());
+                repostInfo.put("tipo", "repost"); // Indica que é um repost
+                combinedList.add(repostInfo);
+            }
+        }
+
+        return combinedList;
     }
 
     private ComentarioDTO convertToDTO(Comentario comentario) {

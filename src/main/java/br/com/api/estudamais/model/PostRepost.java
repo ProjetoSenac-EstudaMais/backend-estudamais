@@ -24,7 +24,17 @@ public class PostRepost {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
+    private String isRepost;
 
-    
+    public Long getUserId() {
+        if (this.user != null) {
+            return this.user.getId(); 
+        }
+        return null;
+    }
+
+    public String getConteudo() {
+        return this.post.getConteudo();
+    }
+
 }
-

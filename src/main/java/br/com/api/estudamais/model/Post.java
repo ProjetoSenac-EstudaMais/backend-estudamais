@@ -49,4 +49,11 @@ public class Post {
         this.numeroReposts = numeroReposts;
     }
 
+    public Long getUserId() {
+        if (this.autor != null) {
+            return this.autor.getId();
+        }
+        return null;
+    }
+
 }
